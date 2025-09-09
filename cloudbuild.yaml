@@ -22,18 +22,20 @@ steps:
     args:
       - 'run'
       - 'deploy'
+      # El nombre que tendrá tu servicio en Cloud Run
       - 'hello-serverless-app'
       - '--image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/hello-serverless:${SHORT_SHA}'
       - '--region=${_REGION}'
       - '--platform=managed'
+      # --- ESTA LÍNEA ES LA CLAVE PARA HACER EL SERVICIO PÚBLICO ---
       - '--allow-unauthenticated'
     id: 'Desplegar en Cloud Run'
 
 # Opciones de la compilación
 options:
-  # Esta línea asegura que la compilación se ejecute en tu entorno privado
+  # Esta línea asegura que la compilación se ejecute en tu entorno privado y seguro
   workerPool: 'projects/${PROJECT_ID}/locations/${_REGION}/workerPools/${_PRIVATE_POOL_NAME}'
-  # --- ESTA ES LA LÍNEA NUEVA Y CRUCIAL QUE SOLUCIONA EL ERROR ---
+  # Esta opción soluciona el error de registros para los grupos privados
   logging: CLOUD_LOGGING_ONLY
 
 # Guarda la URL de la imagen construida para referencia
