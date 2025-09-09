@@ -1,0 +1,42 @@
+# Directorios de caché de Python
+__pycache__/
+*.pyc
+
+# Entornos virtuales
+.env
+.venv
+env/
+venv/
+
+
+---
+
+### **Tu Siguiente (y Último) Paso: Subir el Código a GitHub**
+
+Ahora que tienes todos los archivos, solo necesitas subirlos a tu repositorio.
+
+1.  Abre una terminal o la **Cloud Shell**.
+2.  Navega a la carpeta donde guardaste los 5 archivos (`mi-proyecto-python`).
+3.  Ejecuta estos comandos en orden para subir todo a tu repositorio.
+
+    ```bash
+    # Inicializa git en tu carpeta
+    git init
+
+    # Agrega todos los archivos para subirlos
+    git add .
+
+    # Guarda esta versión de los archivos con un mensaje
+    git commit -m "Versión inicial del proyecto serverless"
+
+    # Asegura que la rama principal se llame "main"
+    git branch -M main
+
+    # Conecta tu carpeta local con tu repositorio en GitHub
+    # ¡RECUERDA CAMBIAR LA URL POR LA DE TU REPOSITORIO!
+    git remote add origin https://github.com/[TU_USUARIO]/[NOMBRE_DEL_REPO].git
+
+    # Sube los archivos a GitHub
+    git push -u origin main
+    
+**¡Y ya está!** En el momento en que ejecutes `git push`, tu `trigger` en Cloud Build se activará. Ve a la sección **"History" (Historial)** de Cloud Build en la consola de Google Cloud y verás tu pipeline en acción. Cuando termine, tu aplicación estará desplegada y funcionando en Cloud Run.

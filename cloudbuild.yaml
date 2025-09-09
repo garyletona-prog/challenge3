@@ -1,0 +1,42 @@
+# Pasos que Cloud Build ejecutará cuando se active el trigger
+steps:
+  # Paso 1: Construir la imagen del contenedor
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/hello-serverless:${SHORT_SHA}'
+      - '.'
+    id: 'Construir Imagen'
+
+  # Paso 2: Subir la imagen a Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/hello-serverless:${SHORT_SHA}'
+    id: 'Subir a Artifact Registry'
+
+  # Paso 3: Desplegar la imagen en Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      # El nombre que tendrá tu servicio en Cloud Run
+      - 'hello-serverless-app'
+      - '--image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/hello-serverless:${SHORT_SHA}'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      # Permite que cualquiera pueda acceder a la URL del servicio.
+      # Para un servicio privado, elimina esta línea.
+      - '--allow-unauthenticated'
+    id: 'Desplegar en Cloud Run'
+
+# Opciones de la compilación
+options:
+  # ¡IMPORTANTE! Esto asegura que la compilación se ejecute en tu entorno privado y seguro
+  workerPool: 'projects/${PROJECT_ID}/locations/${_REGION}/workerPools/${_PRIVATE_POOL_NAME}'
+
+# Guarda la URL de la imagen construida para referencia
+images:
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/hello-serverless:${SHORT_SHA}'
