@@ -31,12 +31,3 @@ steps:
       # Para un servicio privado, elimina esta línea.
       - '--allow-unauthenticated'
     id: 'Desplegar en Cloud Run'
-
-# Opciones de la compilación
-options:
-  # ¡IMPORTANTE! Esto asegura que la compilación se ejecute en tu entorno privado y seguro
-  workerPool: 'projects/${PROJECT_ID}/locations/${_REGION}/workerPools/${_PRIVATE_POOL_NAME}'
-
-# Guarda la URL de la imagen construida para referencia
-images:
-  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/hello-serverless:${SHORT_SHA}'
