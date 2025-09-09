@@ -27,5 +27,6 @@ COPY --from=builder /app .
 # Exponer el puerto en el que correrá la aplicación (Cloud Run lo usará)
 EXPOSE 8080
 
-# El comando para iniciar la aplicación usando Gunicorn, un servidor de producción
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
+# --- ESTA ES LA LÍNEA CORREGIDA Y CRUCIAL ---
+# Le decimos a Gunicorn que se enlace al puerto definido por la variable de entorno $PORT
+CMD exec gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 0 main:app
