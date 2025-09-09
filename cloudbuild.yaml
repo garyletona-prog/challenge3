@@ -1,43 +1,44 @@
-# Pasos que Cloud Build ejecutará cuando se active el trigger
+# Steps that Cloud Build will execute when the trigger is activated
 steps:
-  # Paso 1: Construir la imagen del contenedor
+  # Step 1: Build the container image
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
       - '-t'
       - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/hello-serverless:${SHORT_SHA}'
       - '.'
-    id: 'Construir Imagen'
+    id: 'Build Image'
 
-  # Paso 2: Subir la imagen a Artifact Registry
+  # Step 2: Push the image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
       - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/hello-serverless:${SHORT_SHA}'
-    id: 'Subir a Artifact Registry'
+    id: 'Push to Artifact Registry'
 
-  # Paso 3: Desplegar la imagen en Cloud Run
+  # Step 3: Deploy the image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
       - 'run'
       - 'deploy'
-      # El nombre que tendrá tu servicio en Cloud Run
+      # The name that your service will have in Cloud Run
       - 'hello-serverless-app'
       - '--image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/hello-serverless:${SHORT_SHA}'
       - '--region=${_REGION}'
       - '--platform=managed'
-      # --- ESTA LÍNEA ES LA CLAVE PARA HACER EL SERVICIO PÚBLICO ---
+      # --- THIS LINE IS THE KEY TO MAKING THE SERVICE PUBLIC ---
       - '--allow-unauthenticated'
-    id: 'Desplegar en Cloud Run'
+    id: 'Deploy to Cloud Run'
 
-# Opciones de la compilación
+# Build options
 options:
-  # Esta línea asegura que la compilación se ejecute en tu entorno privado y seguro
+  # This line ensures the build runs in your private and secure environment
   workerPool: 'projects/${PROJECT_ID}/locations/${_REGION}/workerPools/${_PRIVATE_POOL_NAME}'
-  # Esta opción soluciona el error de registros para los grupos privados
+  # This option fixes the logging error for private pools
   logging: CLOUD_LOGGING_ONLY
 
-# Guarda la URL de la imagen construida para referencia
+# Save the built image URL for reference
 images:
   - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/hello-serverless:${SHORT_SHA}'
+

@@ -1,26 +1,25 @@
-# Usar una imagen base de Python oficial y ligera
+# Use an official and lightweight Python base image
 FROM python:3.12-slim
 
-# Establecer variables de entorno para Python
+# Set environment variables for Python
 ENV PYTHONUNBUFFERED True
 
-# Establecer el directorio de trabajo dentro del contenedor
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copiar el archivo de requerimientos primero para aprovechar la caché de Docker
+# Copy the requirements file first to leverage Docker's cache
 COPY requirements.txt ./
 
-# Instalar las dependencias de la aplicación
+# Install the application dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar todo el código de la aplicación
+# Copy all of the application's source code
 COPY . ./
 
-# Exponer el puerto que Cloud Run usará
+# Expose the port that Cloud Run will use
 EXPOSE 8080
 
-# --- ESTE ES EL COMANDO DE ARRANQUE CORREGIDO Y DEFINITIVO ---
-# Gunicorn se encargará de ejecutar el servidor de producción.
-# Buscará el objeto 'app' en el archivo 'main.py'.
+# --- THIS IS THE CORRECTED AND FINAL STARTUP COMMAND ---
+# Gunicorn will be responsible for running the production server.
+# It will look for the 'app' object in the 'main.py' file.
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
-
