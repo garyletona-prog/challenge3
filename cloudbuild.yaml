@@ -1,5 +1,5 @@
 steps:
-# --- NUEVOS PASOS AÑADIDOS ---
+# --- new steps ---
 # Paso 0a: Descargar el archivo de dependencias desde GCS
 - name: 'gcr.io/cloud-builders/gsutil'
   args: ['cp', 'gs://challenge3bucket/dependencies.tar.gz', '.']
