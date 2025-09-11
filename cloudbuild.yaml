@@ -1,35 +1,48 @@
-# Steps that Cloud Build will execute when the trigger is activated
 steps:
-  # Step 1: Build the container image
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'build'
-      - '-t'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/hello-serverless:${SHORT_SHA}'
-      - '.'
-    id: 'Build Image'
+# --- NUEVOS PASOS AÑADIDOS ---
+# Paso 0a: Descargar el archivo de dependencias desde GCS
+- name: 'gcr.io/cloud-builders/gsutil'
+  args: ['cp', 'gs://challenge3bucket/dependencies.tar.gz', '.']
+  id: 'Descargar Dependencias'
 
-  # Step 2: Push the image to Artifact Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/hello-serverless:${SHORT_SHA}'
-    id: 'Push to Artifact Registry'
+# Paso 0b: Descomprimir las dependencias en una carpeta llamada 'packages'
+- name: 'ubuntu'
+  args: ['tar', '-xzf', 'dependencies.tar.gz']
+  id: 'Descomprimir Dependencias'
 
-  # Step 3: Deploy the image to Cloud Run
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: gcloud
-    args:
-      - 'run'
-      - 'deploy'
-      # The name that your service will have in Cloud Run
-      - 'hello-serverless-app'
-      - '--image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/hello-serverless:${SHORT_SHA}'
-      - '--region=${_REGION}'
-      - '--platform=managed'
-      # --- THIS LINE IS THE KEY TO MAKING THE SERVICE PUBLIC ---
-      - '--allow-unauthenticated'
-    id: 'Deploy to Cloud Run'
+# --- PASOS ORIGINALES (ahora continúan después de la preparación) ---
+# Step 1: Build the container image
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - 'build'
+    - '-t'
+    - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/hello-serverless:${SHORT_SHA}'
+    - '.'
+  id: 'Build Image'
+  # Asegura que este paso espere a que las dependencias estén listas
+  waitFor: ['Descomprimir Dependencias']
+
+# Step 2: Push the image to Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - 'push'
+    - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/hello-serverless:${SHORT_SHA}'
+  id: 'Push to Artifact Registry'
+
+# Step 3: Deploy the image to Cloud Run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args:
+    - 'run'
+    - 'deploy'
+    # The name that your service will have in Cloud Run
+    - 'hello-serverless-app'
+    - '--image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/hello-serverless:${SHORT_SHA}'
+    - '--region=${_REGION}'
+    - '--platform=managed'
+    # --- THIS LINE IS THE KEY TO MAKING THE SERVICE PUBLIC ---
+    - '--allow-unauthenticated'
+  id: 'Deploy to Cloud Run'
 
 # Build options
 options:
@@ -42,3 +55,5 @@ options:
 images:
   - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/hello-serverless:${SHORT_SHA}'
 
+
+  

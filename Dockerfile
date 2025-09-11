@@ -10,8 +10,22 @@ WORKDIR /app
 # Copy the requirements file first to leverage Docker's cache
 COPY requirements.txt ./
 
-# Install the application dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# --- INICIO DE LA MODIFICACIÓN ---
+
+# Paso 1: Copia la carpeta 'packages' (que Cloud Build descargó de GCS)
+# al interior de la imagen de Docker.
+COPY packages/ ./packages/
+
+# Paso 2: Instala las dependencias usando SOLAMENTE los paquetes de la carpeta local.
+# --no-index: Le dice a pip que NO se conecte al índice de paquetes de internet (PyPI).
+# --find-links=./packages: Le dice a pip dónde encontrar los archivos de los paquetes.
+RUN pip install --no-cache-dir --no-index --find-links=./packages -r requirements.txt
+
+# Paso 3 (Opcional pero recomendado): Limpia la carpeta de paquetes después de la instalación
+# para que la imagen final del contenedor sea más pequeña y eficiente.
+RUN rm -rf ./packages/
+
+# --- FIN DE LA MODIFICACIÓN ---
 
 # Copy all of the application's source code
 COPY . ./
